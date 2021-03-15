@@ -8,10 +8,10 @@ import time
 from influxdb import InfluxDBClient
 
 ### File Paths
-OPENVPNLOG_PATH = 'TestLogs/status.log'### TEMP FILES PATHS
-TMP_FILE_PATH = 'TestLogs/tmp.txt'
-IP_LOOKUP_TABLE_PATH = 'IP_Table.json'
-PREV_PULLED_DATA_PATH = 'prev_pulled_data.json'
+OPENVPNLOG_PATH = '/var/log/openvpn/status.log'### TEMP FILES PATHS
+TMP_FILE_PATH = '/OpenVPNLogging/tmp/tmp.txt'
+IP_LOOKUP_TABLE_PATH = '/OpenVPNLogging/IPLookup/IP_Table.json'
+PREV_PULLED_DATA_PATH = 'prev_data.json'
 
 ###Regular Expressiosn
 VPN_IP = re.compile(".*\d+,\d+")
@@ -34,7 +34,7 @@ def main():
     influx_client = InfluxDBClient(host=HOST, port=PORT, database=database_name)
     init_directories()
 
-    #concat_syslogs() #not needed for testing on windows machine
+    concat_syslogs() #not needed for testing on windows machine
 
     if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
         build_IP_lookup_table()
@@ -57,7 +57,6 @@ def main():
         return
 
     elif sys.argv[1].casefold() == "log":
-        print(user_data)
         prev_data = load_prev_pulled_data()
         if prev_data == False:
             for key in user_data.keys():
@@ -77,6 +76,8 @@ def main():
                 cache_prev(user_data)
                 continue
 
+
+            print(prev_data)
             data_up_delta = int(current[3]) - int(prev[3])
             data_down_delta = int(current[4]) - int(prev[4])
 

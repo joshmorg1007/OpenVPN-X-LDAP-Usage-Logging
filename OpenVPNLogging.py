@@ -258,15 +258,29 @@ def log_data_usage(influx_client, name, IP, virt_IP, data_up, data_down):
 
     log.append(
         {
-                "measurement": "usage",
+                "measurement": "Download",
                 "tags": {
                         "user": name,
                         "IP": IP,
                         "VirtIP": virt_IP
                 },
                 "fields": {
-                        "date_up": data_up,
                         "data_down": data_down
+                },
+                "time": data_end_time
+        }
+        )
+
+    log.append(
+        {
+                "measurement": "Upload",
+                "tags": {
+                        "user": name,
+                        "IP": IP,
+                        "VirtIP": virt_IP
+                },
+                "fields": {
+                        "data_down": data_up
                 },
                 "time": data_end_time
         }

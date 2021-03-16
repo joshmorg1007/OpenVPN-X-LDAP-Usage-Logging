@@ -472,7 +472,7 @@ def datetime_to_mili_two(date):
     """Converts the timestamp is status.log to miliseconds"""
     today = datetime.today()
     current_year = str(today.year)[2:]
-    month = date[3:7]
+    month = date[4:7]
     the_rest = date[7:20]
 
     if(month == "Jan"):

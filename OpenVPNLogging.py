@@ -68,7 +68,7 @@ def main():
         log_active_users(influx_client, user_data)
 
         for key in prev_data.keys():
-            prev = user_data[key]
+            prev = prev_data[key]
 
             try:
                 current = user_data[key]

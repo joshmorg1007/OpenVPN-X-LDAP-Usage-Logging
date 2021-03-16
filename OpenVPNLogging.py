@@ -67,6 +67,14 @@ def main():
 
         log_active_users(influx_client, user_data)
 
+        for key in prev_data.keys():
+            prev = user_data[key]
+
+            try:
+                current = user_data[key]
+            except:
+                log_logout_event(influx_client, prev)
+
         for key in user_data.keys():
             current = user_data[key]
 
@@ -91,6 +99,7 @@ def main():
                 do_login = True
 
             if(do_login == True):
+                log_logout_event(influx_client, current)
                 log_login_event(influx_client, current)
 
             log_data_usage(influx_client, current[0], current[1], current[2], data_up_delta, data_down_delta)
@@ -270,7 +279,7 @@ def log_logout_event(influx_client, user_info): ### need to implement when to ca
         {
                 "measurement": "eventlog",
                 "tags": {
-                        "user": user_info[0],
+                        "user": user_info[0],###Change user to User
                         "IP": user_info[1],
                         "VirtIP": user_info[2]
                 },

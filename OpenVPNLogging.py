@@ -426,29 +426,29 @@ def datetime_to_mili(date):
     the_rest = date[3:]
 
     if(month == "Jan"):
-        date = "01 " + the_rest + str(current_year)
+        date = "01" + the_rest + str(current_year)
     elif(month == "Feb"):
-        date = "02 " + the_rest + str(current_year)
+        date = "02" + the_rest + str(current_year)
     elif(month == "Mar"):
-        date = "03 " + the_rest + str(current_year)
+        date = "03" + the_rest + str(current_year)
     elif(month == "Apr"):
-        date = "04 " + the_rest + str(current_year)
+        date = "04" + the_rest + str(current_year)
     elif(month == "May"):
-        date = "05 " + the_rest + str(current_year)
+        date = "05" + the_rest + str(current_year)
     elif(month == "Jun"):
-        date = "06 " + the_rest + str(current_year)
+        date = "06" + the_rest + str(current_year)
     elif(month == "Jul"):
-        date = "07 " + the_rest + str(current_year)
+        date = "07" + the_rest + str(current_year)
     elif(month == "Aug"):
-        date = "08 " + the_rest + str(current_year)
+        date = "08" + the_rest + str(current_year)
     elif(month == "Sep"):
-        date = "09 " + the_rest + str(current_year)
+        date = "09" + the_rest + str(current_year)
     elif(month == "Oct"):
-        date = "10 " + the_rest + str(current_year)
+        date = "10" + the_rest + str(current_year)
     elif(month == "Nov"):
-        date = "11 " + the_rest + str(current_year)
+        date = "11" + the_rest + str(current_year)
     elif(month == "Dec"):
-        date = "12 " + the_rest +" " +str(current_year)
+        date = "12" + the_rest +" " +str(current_year)
 
     new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")
 

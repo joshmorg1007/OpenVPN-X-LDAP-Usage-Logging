@@ -255,7 +255,6 @@ def pull_successful_auth():
         return succeded
 
 def log_failed_auth(influx_client):
-    return ###not implemented fully
     with open(TMP_FILE_PATH, 'r') as file:#need to change to syslog after done testing
         log = list()
         for line in file.readlines():
@@ -269,7 +268,7 @@ def log_failed_auth(influx_client):
                     {
                             "measurement": "eventlog",
                             "tags": {
-                                    "user": user_info[0], ###Change user to User
+                                    "user": "Unknown", ###need to implement change to see if IP is in table
                                     "IP": ip
                             },
                             "fields": {

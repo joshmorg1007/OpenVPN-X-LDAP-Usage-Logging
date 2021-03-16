@@ -428,27 +428,27 @@ def datetime_to_mili(date):
 
     if(month == "Jan"):
         date = "01 " + the_rest + str(current_year)
-    else if(month == "Feb"):
+    elif(month == "Feb"):
         date = "02 " + the_rest + str(current_year)
-    else if(month == "Mar"):
+    elif(month == "Mar"):
         date = "03 " + the_rest + str(current_year)
-    else if(month == "Apr"):
+    elif(month == "Apr"):
         date = "04 " + the_rest + str(current_year)
-    else if(month == "May"):
+    elif(month == "May"):
         date = "05 " + the_rest + str(current_year)
-    else if(month == "Jun"):
+    elif(month == "Jun"):
         date = "06 " + the_rest + str(current_year)
-    else if(month == "Jul"):
+    elif(month == "Jul"):
         date = "07 " + the_rest + str(current_year)
-    else if(month == "Aug"):
+    elif(month == "Aug"):
         date = "08 " + the_rest + str(current_year)
-    else if(month == "Sep"):
+    elif(month == "Sep"):
         date = "09 " + the_rest + str(current_year)
-    else if(month == "Oct"):
+    elif(month == "Oct"):
         date = "10 " + the_rest + str(current_year)
-    else if(month == "Nov"):
+    elif(month == "Nov"):
         date = "11 " + the_rest + str(current_year)
-    else if(month == "Dec"):
+    elif(month == "Dec"):
         date = "12 " + the_rest +" " +str(current_year)
 
     new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")

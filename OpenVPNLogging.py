@@ -5,20 +5,24 @@ import json
 import sys
 import platform
 import time
+from datetime import datetime
 from influxdb import InfluxDBClient
 
 ### File Paths
 OPENVPNLOG_PATH = '/var/log/openvpn/status.log'### TEMP FILES PATHS
 TMP_FILE_PATH = '/OpenVPNLogging/tmp/tmp.txt'
 IP_LOOKUP_TABLE_PATH = '/OpenVPNLogging/IPLookup/IP_Table.json'
+SYS_LOG_PATH = '/var/log/syslog'
 PREV_PULLED_DATA_PATH = 'prev_data.json'
 
 ###Regular Expressiosn
 VPN_IP = re.compile(".*\d+,\d+")
 VIRTUAL_IP = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3},")
 SUCCEED_AUTH = re.compile(".*succeeded for username")
+FAILED_AUTH = re.compile(".*TLS Auth Error")
 NAME = re.compile ("\w+(?=')")
 IP = re.compile("\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(?=:\d+)")
+DATE = re.compile("\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}")
 
 ###influxdb Parameters
 HOST = "192.168.71.108"
@@ -66,6 +70,7 @@ def main():
                 cache_prev(user_data)
 
         log_active_users(influx_client, user_data)
+        log_failed_auth(influx_client)
 
         for key in prev_data.keys():
             prev = prev_data[key]
@@ -249,6 +254,37 @@ def pull_successful_auth():
                 succeded[ip[0]] = name[0]
         return succeded
 
+def log_failed_auth(influx_client):
+    return ###not implemented fully
+    with open(TMP_FILE_PATH, 'r') as file:#need to change to syslog after done testing
+        log = list()
+        for line in file.readlines():
+            if FAILED_AUTH.match(line) is not None:
+                ip = IP.findall(line)
+                date_time = DATE.findall(line)
+
+                date_time = datetime_to_mili(date_time)
+
+                log.append(
+                    {
+                            "measurement": "eventlog",
+                            "tags": {
+                                    "user": user_info[0], ###Change user to User
+                                    "IP": ip
+                            },
+                            "fields": {
+                                    "Event": "User Failed Authentication"
+                            },
+                            "time": date_time
+                    }
+                    )
+
+
+    client_write_start_time = time.perf_counter()
+    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    client_write_end_time = time.perf_counter()
+    print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
+
 def log_login_event(influx_client, user_info):
     data_end_time = int(time.time() * 1000) #milliseconds
     log = list()
@@ -382,6 +418,42 @@ def concat_syslogs():
     """Concatinates all syslog files into one temp file"""
     os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip > " + TMP_FILE_PATH)
     os.system("/bin/cat /var/log/syslog.1 /var/log/syslog >> " + TMP_FILE_PATH)
+
+def datetime_to_mili(date):
+    today = datetime.today()
+    current_year = str(today.year)[2:]
+
+    month = date[:2]
+    the_rest = date[3:]
+
+    if(month == "Jan"):
+        date = "01 " + the_rest + str(current_year)
+    else if(month == "Feb"):
+        date = "02 " + the_rest + str(current_year)
+    else if(month == "Mar"):
+        date = "03 " + the_rest + str(current_year)
+    else if(month == "Apr"):
+        date = "04 " + the_rest + str(current_year)
+    else if(month == "May"):
+        date = "05 " + the_rest + str(current_year)
+    else if(month == "Jun"):
+        date = "06 " + the_rest + str(current_year)
+    else if(month == "Jul"):
+        date = "07 " + the_rest + str(current_year)
+    else if(month == "Aug"):
+        date = "08 " + the_rest + str(current_year)
+    else if(month == "Sep"):
+        date = "09 " + the_rest + str(current_year)
+    else if(month == "Oct"):
+        date = "10 " + the_rest + str(current_year)
+    else if(month == "Nov"):
+        date = "11 " + the_rest + str(current_year)
+    else if(month == "Dec"):
+        date = "12 " + the_rest +" " +str(current_year)
+
+    new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")
+
+    return new_date.timestamp() * 1000
 
 def help():
     """print out command line arguments"""

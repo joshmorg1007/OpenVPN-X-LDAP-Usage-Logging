@@ -76,10 +76,15 @@ def main():
                 cache_prev(user_data)
                 continue
 
-
-            print(prev_data)
             data_up_delta = int(current[3]) - int(prev[3])
+            if(data_up_delta < 0):
+                data_up_delta = 0
+                log_login_event(influx_client, current)
+
             data_down_delta = int(current[4]) - int(prev[4])
+            if(data_up_delta < 0):
+                data_down_delta = 0
+                log_login_event(influx_client, current)
 
             log_data_usage(influx_client, current[0], current[1], current[2], data_up_delta, data_down_delta)
 
@@ -235,12 +240,37 @@ def log_login_event(influx_client, user_info):
         {
                 "measurement": "eventlog",
                 "tags": {
-                        "user": user_info[0],
+                        "user": user_info[0], ###Change user to User
                         "IP": user_info[1],
                         "VirtIP": user_info[2]
                 },
                 "fields": {
                         "Event": "User Logged In"
+                },
+                "time": data_end_time
+        }
+        )
+
+    client_write_start_time = time.perf_counter()
+    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    client_write_end_time = time.perf_counter()
+    print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
+
+def log_logout_event(influx_client, user_info): ### need to implement wen to call this function
+    data_end_time = int(time.time() * 1000) #milliseconds
+    print("logged in")
+    log = list()
+
+    log.append(
+        {
+                "measurement": "eventlog",
+                "tags": {
+                        "user": user_info[0],
+                        "IP": user_info[1],
+                        "VirtIP": user_info[2]
+                },
+                "fields": {
+                        "Event": "User Logged out"
                 },
                 "time": data_end_time
         }
@@ -280,7 +310,7 @@ def log_data_usage(influx_client, name, IP, virt_IP, data_up, data_down):
                         "VirtIP": virt_IP
                 },
                 "fields": {
-                        "data_down": data_up
+                        "data_down": data_up ##need to change to "data_up" when implementing on real server
                 },
                 "time": data_end_time
         }

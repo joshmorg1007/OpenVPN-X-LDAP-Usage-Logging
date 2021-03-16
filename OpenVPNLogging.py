@@ -77,13 +77,18 @@ def main():
                 continue
 
             data_up_delta = int(current[3]) - int(prev[3])
+            do_login = False
+
             if(data_up_delta < 0):
                 data_up_delta = 0
-                log_login_event(influx_client, current)
+                do_login = True
 
             data_down_delta = int(current[4]) - int(prev[4])
-            if(data_up_delta < 0):
+            if(data_down_delta < 0):
                 data_down_delta = 0
+                do_login = True
+
+            if(do_login == True):
                 log_login_event(influx_client, current)
 
             log_data_usage(influx_client, current[0], current[1], current[2], data_up_delta, data_down_delta)

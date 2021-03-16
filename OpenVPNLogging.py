@@ -424,7 +424,7 @@ def print_formated_data(user_data):
         data_rec = user_data[IP][3]
         data_sent = user_data[IP][4]
         active_time = user_data[IP][5]
-        print ("{:<15} {:<18} {:<15} {:<25} {:<17} {:<25}".format(name, IP, virt_ip, float(data_rec)/1000000, float(data_sent)/1000000, active_time))
+        print ("{:<15} {:<18} {:<15} {:<25} {:<17} {:<25}".format(name, IP, virt_ip, float(data_rec)*0.00000095367432, float(data_sent)*0.00000095367432, active_time))
 
 def concat_syslogs():
     """Concatinates all syslog files into one temp file"""

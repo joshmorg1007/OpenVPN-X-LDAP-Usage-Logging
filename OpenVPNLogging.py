@@ -262,7 +262,7 @@ def log_failed_auth(influx_client):
                 ip = IP.findall(line)
                 date_time = DATE.findall(line)
 
-                date_time = datetime_to_mili(date_time)
+                date_time = datetime_to_mili(date_time[0])
 
                 log.append(
                     {

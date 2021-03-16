@@ -452,7 +452,7 @@ def datetime_to_mili(date):
 
     new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")
 
-    return new_date.timestamp() * 1000
+    return round(new_date.timestamp() * 1000)
 
 def help():
     """print out command line arguments"""

@@ -91,21 +91,28 @@ def main():
                 cache_prev(user_data)
                 continue
 
-            data_up_delta = int(current[3]) - int(prev[3])
             do_login = False
+            data_up_delta = int(current[3]) - int(prev[3])
 
-            if(data_up_delta < 0):
+            if(data_up_delta < 0):### Fix to the issue when user would disconnect then connect within the 1 minute window of the script being called, resulting in a negative delta
                 data_up_delta = 0
                 do_login = True
 
             data_down_delta = int(current[4]) - int(prev[4])
-            if(data_down_delta < 0):
+
+            if(data_down_delta < 0):### Fix to the issue when user would disconnect then connect within the 1 minute window of the script being called, resulting in a negative delta
                 data_down_delta = 0
                 do_login = True
 
-            if(do_login == True):
+            if(do_login == True):### Fix to the issue when user would disconnect then connect within the 1 minute window of the script being called, resulting in a negative delta
                 log_logout_event(influx_client, current)
                 log_login_event(influx_client, current)
+
+
+            if(datetime_to_mili_two(current[5]) < datetime_to_mili_two(prev[5])): ### Fix to the issue where the OpenVPN log's track of the data would reset, then revert back after a period of time
+                cache_prev(user_data)
+                data_down_delta = 0
+                data_up_delta = 0
 
             log_data_usage(influx_client, current[0], current[1], current[2], data_up_delta, data_down_delta)
 
@@ -255,7 +262,8 @@ def pull_successful_auth():
         return succeded
 
 def log_failed_auth(influx_client):
-    with open(TMP_FILE_PATH, 'r') as file:#need to change to syslog after done testing
+    """Parses through syslog file to find Authentication Failure events and adds a log into the eventlog measurement"""
+    with open(SYS_LOG_PATH, 'r') as file:#need to change to syslog after done testing
         log = list()
         for line in file.readlines():
             if FAILED_AUTH.match(line) is not None:
@@ -269,7 +277,7 @@ def log_failed_auth(influx_client):
                             "measurement": "eventlog",
                             "tags": {
                                     "user": "Unknown", ###need to implement change to see if IP is in table
-                                    "IP": ip
+                                    "IP": ip[0]
                             },
                             "fields": {
                                     "Event": "User Failed Authentication"
@@ -285,6 +293,7 @@ def log_failed_auth(influx_client):
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
 def log_login_event(influx_client, user_info):
+    """Adds a Login Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
     log = list()
 
@@ -308,7 +317,8 @@ def log_login_event(influx_client, user_info):
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
-def log_logout_event(influx_client, user_info): ### need to implement when to call this function
+def log_logout_event(influx_client, user_info):
+    """Adds a Logout Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
     log = list()
 
@@ -333,6 +343,7 @@ def log_logout_event(influx_client, user_info): ### need to implement when to ca
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
 def log_active_users(influx_client, user_data):
+    """Drops the old statuslog measurement then adds all currently connected users to the satuslog measurement"""
     influx_client.drop_measurement("statuslog")
 
     log = list()
@@ -361,6 +372,7 @@ def log_active_users(influx_client, user_data):
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
 def log_data_usage(influx_client, name, IP, virt_IP, data_up, data_down):
+    """adds a Download and Upload usage measurement to the database for each user connected"""
     data_end_time = int(time.time() * 1000) #milliseconds
     print("logging data")
     log = list()
@@ -401,6 +413,7 @@ def log_data_usage(influx_client, name, IP, virt_IP, data_up, data_down):
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
 def print_formated_data(user_data):
+    """Output the status log matched to the IP lookup table is a nice format"""
     print("\n")
     print("################################################### CONNECTED USERS ###################################################")
     print ("{:<15} {:<18} {:<15} {:<25} {:<17} {:<25}".format('User Name','External IP','Virtual IP', 'Data Recieved From (MB)', 'Data Sent To (MB)', 'Connected Since: '))
@@ -419,6 +432,7 @@ def concat_syslogs():
     os.system("/bin/cat /var/log/syslog.1 /var/log/syslog >> " + TMP_FILE_PATH)
 
 def datetime_to_mili(date):
+    """Converts the timestamp in syslog to miliseconds"""
     today = datetime.today()
     current_year = str(today.year)[2:]
 
@@ -449,6 +463,43 @@ def datetime_to_mili(date):
         date = "11" + the_rest +" " + str(current_year)
     elif(month == "Dec"):
         date = "12" + the_rest +" " + str(current_year)
+
+    new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")
+
+    return round(new_date.timestamp() * 1000)
+
+def datetime_to_mili_two(date):
+    """Converts the timestamp is status.log to miliseconds"""
+    today = datetime.today()
+    current_year = str(today.year)[2:]
+    day = date[:3]
+    the_rest = date[7:20]
+
+    if(month == "Jan"):
+        date = "01" + the_rest + current_year
+    elif(month == "Feb"):
+        date = "02" + the_rest + current_year
+    elif(month == "Mar"):
+        date = "03" + the_rest + current_year
+    elif(month == "Apr"):
+        date = "04" + the_rest + current_year
+    elif(month == "May"):
+        date = "05" + the_rest + current_year
+    elif(month == "Jun"):
+        date = "06" + the_rest + current_year
+    elif(month == "Jul"):
+        date = "07" + the_rest + current_year
+    elif(month == "Aug"):
+        date = "08" + the_rest + current_year
+    elif(month == "Sep"):
+        date = "09" + the_rest + current_year
+    elif(month == "Oct"):
+        date = "10" + the_rest + current_year
+    elif(month == "Nov"):
+        date = "11" + the_rest + current_year
+    elif(month == "Dec"):
+        date = "12" + the_rest + current_year
+
 
     new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")
 

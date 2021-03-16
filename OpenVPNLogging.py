@@ -65,6 +65,8 @@ def main():
                 log_data_usage(influx_client, current[0], current[1], current[2], 0, 0)
                 cache_prev(user_data)
 
+        log_active_users(influx_client, user_data)
+
         for key in user_data.keys():
             current = user_data[key]
 
@@ -238,7 +240,6 @@ def pull_successful_auth():
 
 def log_login_event(influx_client, user_info):
     data_end_time = int(time.time() * 1000) #milliseconds
-    print("logged in")
     log = list()
 
     log.append(
@@ -261,9 +262,8 @@ def log_login_event(influx_client, user_info):
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
-def log_logout_event(influx_client, user_info): ### need to implement wen to call this function
+def log_logout_event(influx_client, user_info): ### need to implement when to call this function
     data_end_time = int(time.time() * 1000) #milliseconds
-    print("logged in")
     log = list()
 
     log.append(
@@ -280,6 +280,34 @@ def log_logout_event(influx_client, user_info): ### need to implement wen to cal
                 "time": data_end_time
         }
         )
+
+    client_write_start_time = time.perf_counter()
+    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    client_write_end_time = time.perf_counter()
+    print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
+
+def log_active_user(influx_client, user_data):
+    influx_client.drop_measurement("statuslog")
+
+    for key in user_data.keys():
+        current = user_data[key]
+        data_end_time = int(time.time() * 1000) #milliseconds
+        log = list()
+
+        log.append(
+            {
+                    "measurement": "statuslog",
+                    "tags": {
+                            "user": current[0],
+                            "IP": current[1],
+                            "VirtIP": current[2]
+                    },
+                    "fields": {
+                            "Event": "User Active"
+                    },
+                    "time": data_end_time
+            }
+            )
 
     client_write_start_time = time.perf_counter()
     influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')

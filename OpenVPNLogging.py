@@ -286,7 +286,7 @@ def log_logout_event(influx_client, user_info): ### need to implement when to ca
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
-def log_active_user(influx_client, user_data):
+def log_active_users(influx_client, user_data):
     influx_client.drop_measurement("statuslog")
 
     for key in user_data.keys():

@@ -284,7 +284,7 @@ def log_logout_event(influx_client, user_info): ### need to implement when to ca
                         "VirtIP": user_info[2]
                 },
                 "fields": {
-                        "Event": "User Logged out"
+                        "Event": "User Logged Out"
                 },
                 "time": data_end_time
         }

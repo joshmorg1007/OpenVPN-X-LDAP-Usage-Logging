@@ -289,16 +289,16 @@ def log_logout_event(influx_client, user_info): ### need to implement when to ca
 def log_active_users(influx_client, user_data):
     influx_client.drop_measurement("statuslog")
 
+    log = list()
     for key in user_data.keys():
         current = user_data[key]
         data_end_time = int(time.time() * 1000) #milliseconds
-        log = list()
 
         log.append(
             {
                     "measurement": "statuslog",
                     "tags": {
-                            "user": current[0],
+                            "User": current[0],
                             "IP": current[1],
                             "VirtIP": current[2]
                     },

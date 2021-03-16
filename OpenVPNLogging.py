@@ -26,7 +26,7 @@ PORT = 8086
 
 ### Fucntions
 def main():
-
+    start_time = time.perf_counter()
     influx_client = InfluxDBClient(host=HOST, port=PORT)
     hostname = platform.uname()[1]
     database_name = hostname + "-VPN-Logging"
@@ -106,6 +106,8 @@ def main():
 
         cache_prev(user_data)
         purge_lookup_table()
+        end_time = time.perf_counter()
+        print("Total Runtime: {time}s".format(time=end_time - start_time))
         return
 
 

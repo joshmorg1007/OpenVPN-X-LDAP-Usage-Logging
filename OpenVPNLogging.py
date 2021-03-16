@@ -422,7 +422,7 @@ def datetime_to_mili(date):
     today = datetime.today()
     current_year = str(today.year)[2:]
 
-    month = date[:2]
+    month = date[:3]
     the_rest = date[3:]
 
     if(month == "Jan"):

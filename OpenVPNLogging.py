@@ -295,7 +295,7 @@ def log_failed_auth(client):
 def log_login_event(client, user_info):
     """Adds a Login Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
-    now = datetime.now()
+    now = datetime.UtcNow()
     now = now.isoformat("T") + "Z"
     log = list()
 
@@ -311,7 +311,7 @@ def log_logout_event(client, user_info):
     """Adds a Logout Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
 
-    now = datetime.now()
+    now = datetime.UtcNow()
     now = now.isoformat("T") + "Z"
 
     log = list()
@@ -326,7 +326,7 @@ def log_logout_event(client, user_info):
 def log_active_users(client, user_data):
     """Drops the old statuslog measurement then adds all currently connected users to the satuslog measurement"""
 
-    now = datetime.now()
+    now = datetime.UtcNow()
     hour_ago = now - timedelta(hours=1)
 
     now = now.isoformat("T") + "Z"
@@ -348,7 +348,7 @@ def log_active_users(client, user_data):
 def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     """adds a Download and Upload usage measurement to the database for each user connected"""
     data_end_time = int(time.time() * 1000) #milliseconds
-    now = datetime.now()
+    now = datetime.UtcNow()
     now = now.isoformat("T") + "Z"
     print("logging data")
     log = list()

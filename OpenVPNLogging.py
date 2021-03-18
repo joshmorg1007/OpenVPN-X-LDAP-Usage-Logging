@@ -5,7 +5,7 @@ import json
 import sys
 import platform
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UtcNow
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import BucketsService, Bucket, PostBucketRequest, BucketRetentionRules

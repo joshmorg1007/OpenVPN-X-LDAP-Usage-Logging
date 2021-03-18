@@ -295,9 +295,11 @@ def log_failed_auth(client):
 def log_login_event(client, user_info):
     """Adds a Login Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
+    now = datetime.now()
+    now = now.isoformat("T") + "Z"
     log = list()
 
-    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged In").time(date_time))
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged In").time(now))
 
 
     client_write_start_time = time.perf_counter()
@@ -308,9 +310,13 @@ def log_login_event(client, user_info):
 def log_logout_event(client, user_info):
     """Adds a Logout Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
+
+    now = datetime.now()
+    now = now.isoformat("T") + "Z"
+
     log = list()
 
-    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged Out").time(date_time))
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged Out").time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)
@@ -342,13 +348,15 @@ def log_active_users(client, user_data):
 def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     """adds a Download and Upload usage measurement to the database for each user connected"""
     data_end_time = int(time.time() * 1000) #milliseconds
+    now = datetime.now()
+    now = now.isoformat("T") + "Z"
     print("logging data")
     log = list()
 
-    log.append(Point("Download").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_down", data_down).time(date_time))
+    log.append(Point("Download").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_down", data_down).time(now))
 
 
-    log.append(Point("Upload").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_up", data_up).time(date_time))
+    log.append(Point("Upload").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_up", data_up).time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)

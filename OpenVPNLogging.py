@@ -299,7 +299,7 @@ def log_login_event(client, user_info):
     now = now.isoformat("T") + "Z"
     log = list()
 
-    log.append(Point("eventlog").field("User", user_info[0]).field("IP", user_info[1]).field("VirtIP", user_info[2]).tag("Event", "User Logged In").time(now))
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged In").time(now))
 
 
     client_write_start_time = time.perf_counter()
@@ -316,7 +316,7 @@ def log_logout_event(client, user_info):
 
     log = list()
 
-    log.append(Point("eventlog").field("User", user_info[0]).field("IP", user_info[1]).field("VirtIP", user_info[2]).tag("Event", "User Logged Out").time(now))
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged Out").time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)
@@ -338,7 +338,7 @@ def log_active_users(client, user_data):
         current = user_data[key]
         data_end_time = int(time.time() * 1000) #milliseconds
 
-        log.append(Point("statuslog").field("User", current[0]).field("IP", current[1]).field("VirtIP", current[2]).tag("Event", "User Active").time(now))
+        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)

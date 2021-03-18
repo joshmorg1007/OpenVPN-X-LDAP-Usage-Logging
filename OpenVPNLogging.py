@@ -35,13 +35,14 @@ TOKEN = data["token"]
 URL = data["url"]
 BUCKET = platform.uname()[1] + "-VPN"
 
+start_time = time.perf_counter()
+client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
+write_api = client.write_api(write_options=SYNCHRONOUS)
+bucket_api = client.buckets_api()
+
+
 ### Fucntions
 def main():
-    start_time = time.perf_counter()
-    client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
-    write_api = client.write_api(write_options=SYNCHRONOUS)
-    bucket_api = client.buckets_api()
-
 
     try:
         bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORD_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))

@@ -354,7 +354,7 @@ def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     log = list()
 
     log.append(Point("Download").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_down", data_down).time(now))
-
+    print(data_down)
 
     log.append(Point("Upload").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_up", data_up).time(now))
 

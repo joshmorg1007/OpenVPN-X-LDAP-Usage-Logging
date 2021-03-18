@@ -319,8 +319,11 @@ def log_logout_event(client, user_info):
 def log_active_users(client, user_data):
     """Drops the old statuslog measurement then adds all currently connected users to the satuslog measurement"""
 
-    now = datetime.now().isoformat("T") + "Z"
-    hour_ago = (now - timedelta(hours=1)).isoformat("T") + "Z"
+    now = datetime.now()
+    hour_ago = now - timedelta(hours=1)
+
+    now = now.isoformat("T") + "Z"
+    hour_ago = hour_ago.isoformat("T") + "Z"
     client.delete_api().delete(hour_ago, now, '"_measurement"="statuslog"', bucket = BUCKET, org=ORG)
 
     log = list()

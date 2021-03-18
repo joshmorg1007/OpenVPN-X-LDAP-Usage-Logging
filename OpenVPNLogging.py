@@ -43,7 +43,7 @@ def main():
     hostname = platform.uname()[1]
     database_name = hostname + "-VPN"
 
-    bucket_api.create_bucket(bucket= Bucket(name =database_name))
+    bucket_api.create_bucket(bucket= Bucket(name =database_name, retention_rules=[BucketRetentionRules(every_seconds=0)] ))
     init_directories()
 
     concat_syslogs() #not needed for testing on windows machine

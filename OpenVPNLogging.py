@@ -33,6 +33,7 @@ ORG = data["org"]
 ORD_ID = data["org_id"]
 TOKEN = data["token"]
 URL = data["url"]
+BUCKET = platform.uname()[1] + "-VPN"
 
 ### Fucntions
 def main():
@@ -40,8 +41,7 @@ def main():
     client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
     write_api = client.write_api(write_options=SYNCHRONOUS)
     bucket_api = client.buckets_api()
-    hostname = platform.uname()[1]
-    BUCKET = hostname + "-VPN"
+
 
     try:
         bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORD_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))

@@ -30,6 +30,7 @@ DATE = re.compile("\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}")
 with open("INFLUXDB_SECRETS.conf", "r") as file:
     data = json.load(file)
 ORG = data["org"]
+ORD_ID = data["org_id"]
 TOKEN = data["token"]
 BUCKET = data["bucket"]
 URL = data["url"]
@@ -43,7 +44,7 @@ def main():
     hostname = platform.uname()[1]
     database_name = hostname + "-VPN"
 
-    bucket_api.create_bucket(bucket= Bucket(name =database_name, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
+    bucket_api.create_bucket(bucket= Bucket(name =database_name, org_id=ORD_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
     init_directories()
 
     concat_syslogs() #not needed for testing on windows machine

@@ -41,9 +41,9 @@ def main():
     write_api = client.write_api(write_options=SYNCHRONOUS)
     bucket_api = client.buckets_api()
     hostname = platform.uname()[1]
-    database_name = hostname
+    database_name = hostname + "-VPN"
 
-    bucket_api.create_bucket(bucket= Bucket(), bucket_name=database_name)
+    bucket_api.create_bucket(bucket= Bucket(name =database_name))
     init_directories()
 
     concat_syslogs() #not needed for testing on windows machine

@@ -1,4 +1,4 @@
-import re
+clientimport re
 import string
 import os
 import json
@@ -6,7 +6,8 @@ import sys
 import platform
 import time
 from datetime import datetime
-from influxdb import InfluxDBClient
+from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 ### File Paths
 OPENVPNLOG_PATH = '/var/log/openvpn/status.log'### TEMP FILES PATHS
@@ -25,17 +26,23 @@ IP = re.compile("\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(?=:\d+)")
 DATE = re.compile("\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}")
 
 ###influxdb Parameters
-HOST = "192.168.71.108"
-PORT = 8086
+with open("INFLUXDB_SECRETS.conf", "r") as file:
+    data = json.load(file)
+ORG = data["org"]
+TOKEN = data["token"]
+BUCKET = data["bucket"]
+URL = data["url"]
 
 ### Fucntions
 def main():
     start_time = time.perf_counter()
-    influx_client = InfluxDBClient(host=HOST, port=PORT)
+    client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
+    write_api = client.write_api(write_options=SYNCHRONOUS)
+    bucket_api = client.buckets_api()
     hostname = platform.uname()[1]
     database_name = hostname + "-VPN-Logging"
-    influx_client.create_database(database_name)
-    influx_client = InfluxDBClient(host=HOST, port=PORT, database=database_name)
+
+    bucket_api.create_bucket(bucket_name=database_name)
     init_directories()
 
     concat_syslogs() #not needed for testing on windows machine
@@ -65,12 +72,12 @@ def main():
         if prev_data == False:
             for key in user_data.keys():
                 current = user_data[key]
-                log_login_event(influx_client, current)
-                log_data_usage(influx_client, current[0], current[1], current[2], 0, 0)
+                log_login_event(client, current)
+                log_data_usage(client, current[0], current[1], current[2], 0, 0)
                 cache_prev(user_data)
 
-        log_active_users(influx_client, user_data)
-        log_failed_auth(influx_client)
+        log_active_users(client, user_data)
+        log_failed_auth(client)
 
         for key in prev_data.keys():
             prev = prev_data[key]
@@ -78,7 +85,7 @@ def main():
             try:
                 current = user_data[key]
             except:
-                log_logout_event(influx_client, prev)
+                log_logout_event(client, prev)
 
         for key in user_data.keys():
             current = user_data[key]
@@ -86,8 +93,8 @@ def main():
             try:
                 prev = prev_data[key]
             except:
-                log_login_event(influx_client, current)
-                log_data_usage(influx_client, current[0], current[1], current[2], 0, 0)
+                log_login_event(client, current)
+                log_data_usage(client, current[0], current[1], current[2], 0, 0)
                 cache_prev(user_data)
                 continue
 
@@ -105,8 +112,8 @@ def main():
                 do_login = True
 
             if(do_login == True):### Fix to the issue when user would disconnect then connect within the 1 minute window of the script being called, resulting in a negative delta
-                log_logout_event(influx_client, current)
-                log_login_event(influx_client, current)
+                log_logout_event(client, current)
+                log_login_event(client, current)
 
 
             if(datetime_to_mili_two(current[5]) < datetime_to_mili_two(prev[5])): ### Fix to the issue where the OpenVPN log's track of the data would reset, then revert back after a period of time
@@ -114,7 +121,7 @@ def main():
                 data_down_delta = 0
                 data_up_delta = 0
 
-            log_data_usage(influx_client, current[0], current[1], current[2], data_up_delta, data_down_delta)
+            log_data_usage(client, current[0], current[1], current[2], data_up_delta, data_down_delta)
 
         cache_prev(user_data)
         purge_lookup_table()
@@ -261,7 +268,7 @@ def pull_successful_auth():
                 succeded[ip[0]] = name[0]
         return succeded
 
-def log_failed_auth(influx_client):
+def log_failed_auth(client):
     """Parses through syslog file to find Authentication Failure events and adds a log into the eventlog measurement"""
     with open(SYS_LOG_PATH, 'r') as file:#need to change to syslog after done testing
         log = list()
@@ -272,143 +279,68 @@ def log_failed_auth(influx_client):
 
                 date_time = datetime_to_mili(date_time[0])
 
-                log.append(
-                    {
-                            "measurement": "eventlog",
-                            "tags": {
-                                    "user": "Unknown", ###need to implement change to see if IP is in table
-                                    "IP": ip[0]
-                            },
-                            "fields": {
-                                    "Event": "User Failed Authentication"
-                            },
-                            "time": date_time
-                    }
-                    )
+                log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 
 
     client_write_start_time = time.perf_counter()
-    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    write_api.write(bucket=database_name, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
-def log_login_event(influx_client, user_info):
+def log_login_event(client, user_info):
     """Adds a Login Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
     log = list()
 
-    log.append(
-        {
-                "measurement": "eventlog",
-                "tags": {
-                        "user": user_info[0], ###Change user to User
-                        "IP": user_info[1],
-                        "VirtIP": user_info[2]
-                },
-                "fields": {
-                        "Event": "User Logged In"
-                },
-                "time": data_end_time
-        }
-        )
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged In").time(date_time))
+
 
     client_write_start_time = time.perf_counter()
-    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    write_api.write(bucket=database_name, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
-def log_logout_event(influx_client, user_info):
+def log_logout_event(client, user_info):
     """Adds a Logout Event to the eventlog measurement"""
     data_end_time = int(time.time() * 1000) #milliseconds
     log = list()
 
-    log.append(
-        {
-                "measurement": "eventlog",
-                "tags": {
-                        "user": user_info[0],###Change user to User
-                        "IP": user_info[1],
-                        "VirtIP": user_info[2]
-                },
-                "fields": {
-                        "Event": "User Logged Out"
-                },
-                "time": data_end_time
-        }
-        )
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged Out").time(date_time))
 
     client_write_start_time = time.perf_counter()
-    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    write_api.write(bucket=database_name, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
-def log_active_users(influx_client, user_data):
+def log_active_users(client, user_data):
     """Drops the old statuslog measurement then adds all currently connected users to the satuslog measurement"""
-    influx_client.drop_measurement("statuslog")
+    client.drop_measurement("statuslog")
 
     log = list()
     for key in user_data.keys():
         current = user_data[key]
         data_end_time = int(time.time() * 1000) #milliseconds
 
-        log.append(
-            {
-                    "measurement": "statuslog",
-                    "tags": {
-                            "User": current[0],
-                            "IP": current[1],
-                            "VirtIP": current[2]
-                    },
-                    "fields": {
-                            "Event": "User Active"
-                    },
-                    "time": data_end_time
-            }
-            )
+        log.append(Point("statuslog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Active").time(date_time))
 
     client_write_start_time = time.perf_counter()
-    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    write_api.write(bucket=database_name, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
-def log_data_usage(influx_client, name, IP, virt_IP, data_up, data_down):
+def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     """adds a Download and Upload usage measurement to the database for each user connected"""
     data_end_time = int(time.time() * 1000) #milliseconds
     print("logging data")
     log = list()
 
-    log.append(
-        {
-                "measurement": "Download",
-                "tags": {
-                        "user": name,
-                        "IP": IP,
-                        "VirtIP": virt_IP
-                },
-                "fields": {
-                        "data_down": data_down
-                },
-                "time": data_end_time
-        }
-        )
+    log.append(Point("Download").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_down", data_down).time(date_time))
 
-    log.append(
-        {
-                "measurement": "Upload",
-                "tags": {
-                        "user": name,
-                        "IP": IP,
-                        "VirtIP": virt_IP
-                },
-                "fields": {
-                        "data_down": data_up ##need to change to "data_up" when implementing on real server
-                },
-                "time": data_end_time
-        }
-        )
+
+    log.append(Point("Upload").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_up", data_up).time(date_time))
 
     client_write_start_time = time.perf_counter()
-    influx_client.write_points(log, time_precision='ms', batch_size=10000, protocol='json')
+    write_api.write(bucket=database_name, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 

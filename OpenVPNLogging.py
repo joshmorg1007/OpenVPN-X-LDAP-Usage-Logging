@@ -43,7 +43,7 @@ def main():
     database_name = hostname + "-VPN-Logging"
 
     data = "mem,host=host1 used_percent=23.43234543"
-    write_api.write("test", org, data)
+    write_api.write("test", ORG, data)
 
     bucket_api.create_bucket(bucket_name=database_name)
     init_directories()

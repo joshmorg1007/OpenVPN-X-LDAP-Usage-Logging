@@ -321,7 +321,7 @@ def log_active_users(client, user_data):
 
     now = datetime.now()
     hour_ago = now - timedelta(hours=1)
-    client.delete_api.delete(hour_ago, now, '"_measurement"="statuslog"', bucket = BUCKET, org=ORG)
+    client.delete_api().delete(hour_ago, now, '"_measurement"="statuslog"', bucket = BUCKET, org=ORG)
 
     log = list()
     for key in user_data.keys():

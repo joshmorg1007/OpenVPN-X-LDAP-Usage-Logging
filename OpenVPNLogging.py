@@ -5,7 +5,7 @@ import json
 import sys
 import platform
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import BucketsService, Bucket, PostBucketRequest, BucketRetentionRules
@@ -32,7 +32,6 @@ with open("INFLUXDB_SECRETS.conf", "r") as file:
 ORG = data["org"]
 ORD_ID = data["org_id"]
 TOKEN = data["token"]
-BUCKET = data["bucket"]
 URL = data["url"]
 
 ### Fucntions
@@ -42,10 +41,10 @@ def main():
     write_api = client.write_api(write_options=SYNCHRONOUS)
     bucket_api = client.buckets_api()
     hostname = platform.uname()[1]
-    database_name = hostname + "-VPN"
+    BUCKET = hostname + "-VPN"
 
     try:
-        bucket_api.create_bucket(bucket= Bucket(name =database_name, org_id=ORD_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
+        bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORD_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
     except:
         print("Bucket already exits")
     init_directories()
@@ -320,6 +319,10 @@ def log_logout_event(client, user_info):
 def log_active_users(client, user_data):
     """Drops the old statuslog measurement then adds all currently connected users to the satuslog measurement"""
     client.drop_measurement("statuslog")
+
+    now = datetime.now()
+    hour_ago = now - timedelta(hours=1)
+    client.delete_api.delete(hour_ago, now, "_measurement"="statuslog", bucket = BUCKET)
 
     log = list()
     for key in user_data.keys():

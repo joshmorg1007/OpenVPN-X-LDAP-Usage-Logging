@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
-from influxdb_client import BucketsService, Bucket, PostBucketRequest
+from influxdb_client import BucketsService, Bucket, PostBucketRequest, BucketRetentionRules
 
 ### File Paths
 OPENVPNLOG_PATH = '/var/log/openvpn/status.log'### TEMP FILES PATHS

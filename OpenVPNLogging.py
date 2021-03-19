@@ -419,7 +419,7 @@ def get_con_datetime(date):
 
     new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")
 
-    return round(new_date)
+    return new_date
 
 def datetime_to_mili_two(date):
     """Converts the timestamp is status.log to miliseconds"""

@@ -15,7 +15,7 @@ OPENVPNLOG_PATH = '/var/log/openvpn/status.log'### TEMP FILES PATHS
 TMP_FILE_PATH = '/OpenVPNLogging/tmp/tmp.txt'
 IP_LOOKUP_TABLE_PATH = '/OpenVPNLogging/IPLookup/IP_Table.json'
 SYS_LOG_PATH = '/var/log/syslog'
-PREV_PULLED_DATA_PATH = 'prev_data.json'
+PREV_PULLED_DATA_PATH = '/OpenVPNLogging/prev_data.json'
 
 ###Regular Expressiosn
 VPN_IP = re.compile(".*\d+,\d+")

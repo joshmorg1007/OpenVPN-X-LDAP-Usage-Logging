@@ -283,8 +283,9 @@ def log_failed_auth(client):
                 date_time = DATE.findall(line)
 
                 date_time = get_con_datetime(date_time[0])
-                date_time = date_time.replace(tzinfo=timezone.utc)
-                date_time = date_time.isoformat("T") + "Z"
+                date_time = date_time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+                date_time = date_time.isoformat("T")
+                date_time = date_time[:19] + 'z'
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 

@@ -5,7 +5,7 @@ import json
 import sys
 import platform
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import BucketsService, Bucket, PostBucketRequest, BucketRetentionRules
@@ -282,7 +282,9 @@ def log_failed_auth(client):
                 ip = IP.findall(line)
                 date_time = DATE.findall(line)
 
-                date_time = datetime_to_mili(date_time[0])
+                date_time = get_con_datetime(date_time[0])
+                data_time = data_time.replace(tzinfo=timezone.utc).astimezone(tz=None)
+                date_time = date_time.isoformat("T") + "Z"
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 
@@ -382,7 +384,7 @@ def concat_syslogs():
     os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip > " + TMP_FILE_PATH)
     os.system("/bin/cat /var/log/syslog.1 /var/log/syslog >> " + TMP_FILE_PATH)
 
-def datetime_to_mili(date):
+def get_con_datetime(date):
     """Converts the timestamp in syslog to miliseconds"""
     today = datetime.today()
     current_year = str(today.year)[2:]
@@ -417,7 +419,7 @@ def datetime_to_mili(date):
 
     new_date = datetime.strptime(date, "%m %d %H:%M:%S %y")
 
-    return round(new_date.timestamp() * 1000)
+    return round(new_date)
 
 def datetime_to_mili_two(date):
     """Converts the timestamp is status.log to miliseconds"""

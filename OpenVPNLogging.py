@@ -91,7 +91,7 @@ def main():
                 current = user_data[key]
             except:
                 log_logout_event(client, prev)
-                log_data_usage(client, current[0], current[1], current[2], 0, 0)
+                log_data_usage(client, prev[0], prev[1], prev[2], 0, 0)
 
         for key in user_data.keys():
             current = user_data[key]

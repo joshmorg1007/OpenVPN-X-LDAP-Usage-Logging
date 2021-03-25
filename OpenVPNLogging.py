@@ -55,8 +55,10 @@ def main():
         bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORG_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
     except:
         print("Bucket already exits")
-
-    concat_syslogs() #not needed for testing on windows machine
+    try:
+        concat_syslogs() #not needed for testing on windows machine
+    except:
+        print("issue with cat syslog")
 
     if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
         build_IP_lookup_table()

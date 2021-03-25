@@ -531,7 +531,7 @@ def init_environment():
     config["syslog"] = input("Enter syslog Path: ")
     config["vpn_status"] = input("Enter OpenVPN Status File Path: ")
 
-    config_file = open(installed_path + "config.json", "w")
+    config_file = open(installed_path + "/config.json", "w")
 
     json.dump(config, config_file)
 

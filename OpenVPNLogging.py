@@ -39,15 +39,14 @@ try:
 except:
     print("Issue with Config, please run the command init command")
 
+###influxdb Parameters
+start_time = time.perf_counter()
+client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
+write_api = client.write_api(write_options=SYNCHRONOUS)
+bucket_api = client.buckets_api()
+
 ### Fucntions
 def main():
-
-
-    ###influxdb Parameters
-    start_time = time.perf_counter()
-    client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
-    write_api = client.write_api(write_options=SYNCHRONOUS)
-    bucket_api = client.buckets_api()
 
     try:
         bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORG_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
@@ -301,7 +300,7 @@ def log_failed_auth(client):
 
 
     client_write_start_time = time.perf_counter()
-    client.write_api.write(bucket=BUCKET, org = ORG, record=log)
+    write_api.write(bucket=BUCKET, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
@@ -316,7 +315,7 @@ def log_login_event(client, user_info):
 
 
     client_write_start_time = time.perf_counter()
-    client.write_api.write(bucket=BUCKET, org = ORG, record=log)
+    write_api.write(bucket=BUCKET, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
@@ -332,7 +331,7 @@ def log_logout_event(client, user_info):
     log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged Out").time(now))
 
     client_write_start_time = time.perf_counter()
-    client.write_api.write(bucket=BUCKET, org = ORG, record=log)
+    write_api.write(bucket=BUCKET, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
@@ -354,7 +353,7 @@ def log_active_users(client, user_data):
         log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").time(now))
 
     client_write_start_time = time.perf_counter()
-    client.write_api.write(bucket=BUCKET, org = ORG, record=log)
+    write_api.write(bucket=BUCKET, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 
@@ -372,7 +371,7 @@ def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     log.append(Point("Upload").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_up", data_up).time(now))
 
     client_write_start_time = time.perf_counter()
-    client.write_api.write(bucket=BUCKET, org = ORG, record=log)
+    write_api.write(bucket=BUCKET, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
 

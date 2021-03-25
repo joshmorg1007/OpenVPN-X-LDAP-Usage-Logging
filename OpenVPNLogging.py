@@ -40,10 +40,13 @@ except:
     print("Issue with Config, please run the command init command")
 
 ###influxdb Parameters
-start_time = time.perf_counter()
-client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
-write_api = client.write_api(write_options=SYNCHRONOUS)
-bucket_api = client.buckets_api()
+try:
+    start_time = time.perf_counter()
+    client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
+    write_api = client.write_api(write_options=SYNCHRONOUS)
+    bucket_api = client.buckets_api()
+except:
+    print("Issue with Config, please run the command init command")
 
 ### Fucntions
 def main():

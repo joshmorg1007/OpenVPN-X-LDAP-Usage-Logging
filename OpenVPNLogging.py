@@ -502,16 +502,26 @@ def init_environment():
     except:
         print(cache_data_file_directory_path + ": Dir Already Exists")
 
-    temp_file_path = temp_file_directory_path + "/tmp.txt"
-    IPLookup_file_path = IPLookup_file_directory_path + '/IP_Table.json'
-    cached_data_file_path = cache_data_file_directory_path + "/cached_data.json"
+    temp_file_path = temp_file_directory_path + "tmp.txt"
+    IPLookup_file_path = IPLookup_file_directory_path + 'IP_Table.json'
+    cached_data_file_path = cache_data_file_directory_path + "cached_data.json"
 
-    file = open(temp_file_path, "x")
-    file.close()
-    file = open(IPLookup_file_path, "x")
-    file.close()
-    file = open(cached_data_file_path, "x")
-    file.close()
+    try:
+        file = open(temp_file_path, "x")
+        file.close()
+    except:
+        print("File Exists")
+    try:
+        file = open(IPLookup_file_path, "x")
+        file.close()
+    except:
+        print("file Exists")
+
+    try:
+        file = open(cached_data_file_path, "x")
+        file.close()
+    except:
+        print("File Exists")
 
     print("#################### Generating Config File ####################")
     config = {}

@@ -539,7 +539,7 @@ def init_environment():
 
     json.dump(config, config_file)
 
-    cron_tab = CronTab(user="root")
+    cron_tab = CronTab(user='root')
 
     job_found = False
     for job in cron_tab:

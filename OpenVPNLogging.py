@@ -40,6 +40,9 @@ except:
     print("Issue with Config")
     init_environment()
 
+if(ORG == None):
+    init_environment()
+
 
 ###influxdb Parameters
 start_time = time.perf_counter()

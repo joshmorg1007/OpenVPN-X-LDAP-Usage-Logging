@@ -89,18 +89,18 @@ def main():
 
             try:
                 current = user_data[key]
-            except:
+            except: ### indicates user no longer in the current users list, meaning logout event
                 log_logout_event(client, prev)
-                log_data_usage(client, prev[0], prev[1], prev[2], 0, 0)
+                log_data_usage(client, prev[0], prev[1], prev[2], 0, 0) ### adds entry with 0s for both upload and data afer logout event in order to make the last() function in influx return useful results
 
         for key in user_data.keys():
             current = user_data[key]
 
             try:
                 prev = prev_data[key]
-            except:
+            except:### indicates user is not listed in prev_data cache therefore login event occured
                 log_login_event(client, current)
-                log_data_usage(client, current[0], current[1], current[2], 0, 0)
+                log_data_usage(client, current[0], current[1], current[2], 0, 0) ### Inisializes user records with zeroes
                 cache_prev(user_data)
                 continue
 
@@ -161,6 +161,7 @@ def build_IP_lookup_table():
     ip_table.close()
 
 def cache_prev(prev_data):
+    """writes the previous data to a json file acting as a cache to be used to calculate the delta of data used"""
     prev_file = open(PREV_PULLED_DATA_PATH, "w")
     json.dump(prev_data, prev_file)
 

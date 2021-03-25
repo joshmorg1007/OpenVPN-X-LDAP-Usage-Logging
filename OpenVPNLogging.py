@@ -54,7 +54,6 @@ def main():
         bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORG_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
     except:
         print("Bucket already exits")
-    init_directories()
 
     concat_syslogs() #not needed for testing on windows machine
 

@@ -9,13 +9,8 @@ from datetime import datetime, timedelta, timezone
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client import BucketsService, Bucket, PostBucketRequest, BucketRetentionRules
+from crontab import CronTab
 
-### File Paths
-OPENVPNLOG_PATH = '/var/log/openvpn/status.log'### TEMP FILES PATHS
-TMP_FILE_PATH = '/OpenVPNLogging/tmp/tmp.txt'
-IP_LOOKUP_TABLE_PATH = '/OpenVPNLogging/IPLookup/IP_Table.json'
-SYS_LOG_PATH = '/var/log/syslog'
-PREV_PULLED_DATA_PATH = '/OpenVPNLogging/prev_data.json'
 
 ###Regular Expressiosn
 VPN_IP = re.compile(".*\d+,\d+")
@@ -26,15 +21,27 @@ NAME = re.compile ("\w+(?=')")
 IP = re.compile("\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(?=:\d+)")
 DATE = re.compile("\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}")
 
-###influxdb Parameters
-with open('/OpenVPNLogging/INFLUXDB_SECRETS.conf', "r") as file:
-    data = json.load(file)
-ORG = data["org"]
-ORD_ID = data["org_id"]
-TOKEN = data["token"]
-URL = data["url"]
-BUCKET = platform.uname()[1] + "-VPN"
+### Loading From Config
+try:
+    installed_path = os.path.dirname(os.path.realpath(__file__))
+    with open(installed_path + '/config.json', "r") as file:
+        data = json.load(file)
+    ORG = data["org"]
+    ORG_ID = data["org_id"]
+    TOKEN = data["token"]
+    URL = data["url"]
+    TMP_FILE_PATH = data["tmp_path"]
+    IP_LOOKUP_TABLE_PATH = data["ip_path"]
+    PREV_PULLED_DATA_PATH = data["cache_path"]
+    SYS_LOG_PATH = data["syslog"]
+    OPENVPNLOG_PATH = data["vpn_status"]
+    BUCKET = platform.uname()[1] + "-VPN"
+except:
+    print("Issue with Config")
+    init_environment()
 
+
+###influxdb Parameters
 start_time = time.perf_counter()
 client = InfluxDBClient(url= URL, token= TOKEN, org= ORG)
 write_api = client.write_api(write_options=SYNCHRONOUS)
@@ -45,7 +52,7 @@ bucket_api = client.buckets_api()
 def main():
 
     try:
-        bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORD_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
+        bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORG_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
     except:
         print("Bucket already exits")
     init_directories()
@@ -65,6 +72,10 @@ def main():
 
     if sys.argv[1].casefold() == "help":
         help()
+        return
+
+    elif sys.argv[1].casefold() == "init":
+        init_environment()
         return
 
     elif sys.argv[1].casefold() == "status":
@@ -465,35 +476,67 @@ def help():
     """print out command line arguments"""
     print("Not Implemented")
 
-def init_directories():
-    """Initialized the directories and files """
+def init_environment():
+    """Initializes directories files and config and add cron job"""
+    installed_path = os.path.dirname(os.path.realpath(__file__))
+
+    temp_file_directory_path = installed_path + "/tmp/"
+    IPLookup_file_directory_path = installed_path + "/IPLookup/"
+    cache_data_file_directory_path = installed_path + "/cached_data/"
+
     try:
-        os.mkdir('/OpenVPNLogging/')
+        os.mkdir(temp_file_directory_path)
     except:
-        do = None
+        print(temp_file_directory_path + ": Dir Already Exists")
+
     try:
-        os.mkdir('/OpenVPNLogging/tmp/')
+        os.mkdir(IPLookup_file_directory_path)
     except:
-        do = None
+        print(IPLookup_file_directory_path + ": Dir Already Exists")
+
     try:
-        os.mkdir('/OpenVPNLogging/IPLookup/')
+        os.mkdir(cache_data_file_directory_path)
     except:
-        do = None
-    try:
-        file = open(IP_LOOKUP_TABLE_PATH, 'x')
-        file.close()
-    except:
-        do = None
-    try:
-        file = open(TMP_FILE_PATH, 'x')
-        file.close()
-    except:
-        do = None
-    try:
-        file = open(PREV_PULLED_DATA_PATH, 'x')
-        file.close()
-    except:
-        do = None
+        print(cache_data_file_directory_path + ": Dir Already Exists")
+
+    temp_file_path = temp_file_directory_path + "/tmp.txt"
+    IPLookup_file_path = IPLookup_file_directory_path + '/IP_Table.json'
+    cached_data_file_path = cache_data_file_directory_path + "/cached_data.json"
+
+    file = open(temp_file_path, "x")
+    file.close()
+    file = open(IPLookup_file_path, "x")
+    file.close()
+    file = open(cached_data_file_path, "x")
+    file.close()
+
+    print("#################### Generating Config File ####################")
+    config = {}
+    config["org"] = input("Enter InfluxDB Organization Name: ")
+    config["org_id"] = input("Enter InfluxDB Organization ID: ")
+    config["token"] = input("Enter InfluxDB Token: ")
+    config["url"] = input("Enter InfluxDB URL: ")
+    config["tmp_path"] = temp_file_path
+    config["ip_path"] = IPLookup_file_path
+    config["cache_path"] = cached_data_file_path
+    config["syslog"] = input("Enter syslog Path: ")
+    config["vpn_status"] = input("Enter OpenVPN Status File Path: ")
+
+    config_file = open(installed_path + "config.json", "w")
+
+    json.dump(config, config_file)
+
+    cron_tab = CronTab(user="root")
+
+    job_found = False
+    for job in cron_tab:
+        if job.comment == "OpenVPN Scrapper":
+            job_found = True
+
+    if job_found == False:
+        new_job = cron_tab.new(command = "/usr/bin/python3 " + installed_path + "/OpenVPNLogging.py log", commend = "OpenVPN Scrapper")
+        new_job.minute.every(1)
+        cron_tab.write()
 
 if __name__ == "__main__":
     main()

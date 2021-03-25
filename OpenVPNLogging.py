@@ -87,6 +87,7 @@ def main():
                 log_login_event(client, current)
                 log_data_usage(client, current[0], current[1], current[2], 0, 0)
                 cache_prev(user_data)
+            return
 
         log_active_users(client, user_data)
         log_failed_auth(client)

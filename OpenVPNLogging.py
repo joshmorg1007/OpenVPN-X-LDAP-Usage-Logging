@@ -59,12 +59,16 @@ def main():
         concat_syslogs() #not needed for testing on windows machine
     except:
         print("issue with cat syslog")
+    try:
+        if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
+            build_IP_lookup_table()
+    except:
+        print("issue with initial Ip table build")
 
-    if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
-        build_IP_lookup_table()
-
-    user_data = get_and_match_user_data()
-
+    try:
+        user_data = get_and_match_user_data()
+    except:
+        print("issue with initial userdata call")
     ### Argument handling
     if len(sys.argv) < 2:
         print("Not Enough Arguments Provided")

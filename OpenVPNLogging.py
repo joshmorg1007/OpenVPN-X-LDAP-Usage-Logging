@@ -21,28 +21,27 @@ NAME = re.compile ("\w+(?=')")
 IP = re.compile("\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(?=:\d+)")
 DATE = re.compile("\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}")
 
+    ### Loading From Config
+try:
+    installed_path = os.path.dirname(os.path.realpath(__file__))
+    with open(installed_path + '/config.json', "r") as file:
+        data = json.load(file)
+    ORG = data["org"]
+    ORG_ID = data["org_id"]
+    TOKEN = data["token"]
+    URL = data["url"]
+    TMP_FILE_PATH = data["tmp_path"]
+    IP_LOOKUP_TABLE_PATH = data["ip_path"]
+    PREV_PULLED_DATA_PATH = data["cache_path"]
+    SYS_LOG_PATH = data["syslog"]
+    OPENVPNLOG_PATH = data["vpn_status"]
+    BUCKET = platform.uname()[1] + "-VPN"
+except:
+    print("Issue with Config, please run the command init command")
 
 ### Fucntions
 def main():
 
-    ### Loading From Config
-    try:
-        installed_path = os.path.dirname(os.path.realpath(__file__))
-        with open(installed_path + '/config.json', "r") as file:
-            data = json.load(file)
-        ORG = data["org"]
-        ORG_ID = data["org_id"]
-        TOKEN = data["token"]
-        URL = data["url"]
-        TMP_FILE_PATH = data["tmp_path"]
-        IP_LOOKUP_TABLE_PATH = data["ip_path"]
-        PREV_PULLED_DATA_PATH = data["cache_path"]
-        SYS_LOG_PATH = data["syslog"]
-        OPENVPNLOG_PATH = data["vpn_status"]
-        BUCKET = platform.uname()[1] + "-VPN"
-    except:
-        print("Issue with Config")
-        init_environment()
 
     ###influxdb Parameters
     start_time = time.perf_counter()

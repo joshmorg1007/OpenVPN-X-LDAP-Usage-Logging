@@ -547,7 +547,7 @@ def init_environment():
             job_found = True
 
     if job_found == False:
-        new_job = cron_tab.new(command = "/usr/bin/python3 " + installed_path + "/OpenVPNLogging.py log", commend = "OpenVPN Scrapper")
+        new_job = cron_tab.new(command = "/usr/bin/python3 " + installed_path + "/OpenVPNLogging.py log", comment= "OpenVPN Scrapper")
         new_job.minute.every(1)
         cron_tab.write()
 

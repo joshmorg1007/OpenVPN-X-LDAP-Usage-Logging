@@ -349,7 +349,7 @@ def log_active_users(client, user_data):
     """Drops the old statuslog measurement then adds all currently connected users to the satuslog measurement"""
 
     now = datetime.utcnow()
-    hour_ago = now - timedelta(hours=1)
+    hour_ago = now - timedelta(minutes=1)
 
     now = now.isoformat("T") + "Z"
     hour_ago = hour_ago.isoformat("T") + "Z"

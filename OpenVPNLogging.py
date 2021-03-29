@@ -360,7 +360,7 @@ def log_active_users(client, user_data):
         current = user_data[key]
         data_end_time = int(time.time() * 1000) #milliseconds
 
-        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").time(now))
+        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").field("LoggedInSince", current[5]).time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)

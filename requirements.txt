@@ -1,0 +1,2 @@
+influxdb_client==1.15.0
+python_crontab==2.5.1

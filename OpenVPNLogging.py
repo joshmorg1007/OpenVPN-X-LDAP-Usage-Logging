@@ -64,11 +64,15 @@ def main():
             build_IP_lookup_table()
     except:
         print("issue with initial Ip table build")
+        print("Try (re)running the init command")
+        return
 
     try:
         user_data = get_and_match_user_data()
     except:
         print("issue with initial userdata call")
+        print("Try (re)running the init command")
+        return
     ### Argument handling
     if len(sys.argv) < 2:
         print("Not Enough Arguments Provided")
@@ -151,7 +155,7 @@ def main():
         end_time = time.perf_counter()
         print("Total Runtime: {time}s".format(time=end_time - start_time))
         return
-        
+
     else:
         print("Invalid Argument, Please use the help argument in order to see available commands")
         return

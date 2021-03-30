@@ -97,6 +97,8 @@ def main():
                 log_data_usage(client, current[0], current[1], current[2], 0, 0)
                 cache_prev(user_data)
             return
+    else:
+        print("Invalid Argument, Please use the help argument in order to see available commands")
 
         log_active_users(client, user_data)
         log_failed_auth(client)

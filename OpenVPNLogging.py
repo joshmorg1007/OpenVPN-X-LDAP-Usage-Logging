@@ -97,8 +97,6 @@ def main():
                 log_data_usage(client, current[0], current[1], current[2], 0, 0)
                 cache_prev(user_data)
             return
-    else:
-        print("Invalid Argument, Please use the help argument in order to see available commands")
 
         log_active_users(client, user_data)
         log_failed_auth(client)
@@ -153,7 +151,10 @@ def main():
         end_time = time.perf_counter()
         print("Total Runtime: {time}s".format(time=end_time - start_time))
         return
-
+        
+    else:
+        print("Invalid Argument, Please use the help argument in order to see available commands")
+        return
 
 def build_IP_lookup_table():
     """Builds IP Lookup table JSON file through matching entries in status.log successful LDAP authentications in syslog """

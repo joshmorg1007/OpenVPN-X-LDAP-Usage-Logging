@@ -10,6 +10,8 @@ sudo systemctl start --now telegraf
 echo Enter the InfluxDB Token for Telegraf.
 read token
 
+export INFLUX_TOKEN= $token
+
 echo Enter Telegraf Config File Endpoint
 read config
 

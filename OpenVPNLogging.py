@@ -70,12 +70,12 @@ def main():
         print("Try (re)running the init command")
         return
 
-    try:
-        user_data = get_and_match_user_data()
-    except:
-        print("issue with initial userdata call")
-        print("Try (re)running the init command")
-        return
+    #try:
+    user_data = get_and_match_user_data()
+    #except:
+        #print("issue with initial userdata call")
+        #print("Try (re)running the init command")
+        #return
     ### Argument handling
     if len(sys.argv) < 2:
         print("Not Enough Arguments Provided")

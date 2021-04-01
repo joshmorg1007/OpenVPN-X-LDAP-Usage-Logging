@@ -50,6 +50,9 @@ except:
 
 ### Fucntions
 def main():
+    if sys.argv[1].casefold() == "init":
+        init_environment()
+        return
 
     try:
         bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORG_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
@@ -81,10 +84,6 @@ def main():
 
     if sys.argv[1].casefold() == "help":
         help()
-        return
-
-    elif sys.argv[1].casefold() == "init":
-        init_environment()
         return
 
     elif sys.argv[1].casefold() == "status":

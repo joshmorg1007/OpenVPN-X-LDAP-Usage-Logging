@@ -317,6 +317,7 @@ def log_failed_auth(client):
                     date_time = date_time[:19] + 'z'
                 except:
                     print("no date found")
+                    break
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 

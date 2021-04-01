@@ -295,7 +295,10 @@ def pull_successful_auth():
             if SUCCEED_AUTH.match(line) is not None:
                 name = NAME.findall(line)
                 ip = IP.findall(line)
-                succeded[ip[0]] = name[0]
+                try:
+                    succeded[ip[0]] = name[0]
+                except:
+                    print("No match found")
         return succeded
 
 def log_failed_auth(client):

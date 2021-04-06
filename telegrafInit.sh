@@ -18,5 +18,6 @@ read config
 sudo systemctl stop --now telegraf
 
 sudo curl $config --header "Authorization: Token ${token}" > /etc/telegraf/telegraf.conf
+sudo sed -i "s/\$INFLUX_TOKEN/${token}/g" /etc/telegraf/telegraf.conf
 
 sudo systemctl start --now telegraf

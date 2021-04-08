@@ -58,10 +58,7 @@ def main():
         bucket_api.create_bucket(bucket= Bucket(name =BUCKET, org_id=ORG_ID, retention_rules=[BucketRetentionRules(every_seconds=604800)] ))
     except:
         print("Bucket already exits")
-    try:
-        concat_syslogs() #not needed for testing on windows machine
-    except:
-        print("issue with cat syslog")
+
     try:
         if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
             build_IP_lookup_table()
@@ -70,12 +67,8 @@ def main():
         print("Try (re)running the init command")
         return
 
-    #try:
     user_data = get_and_match_user_data()
-    #except:
-        #print("issue with initial userdata call")
-        #print("Try (re)running the init command")
-        #return
+
     ### Argument handling
     if len(sys.argv) < 2:
         print("Not Enough Arguments Provided")
@@ -161,7 +154,9 @@ def main():
 
 def build_IP_lookup_table():
     """Builds IP Lookup table JSON file through matching entries in status.log successful LDAP authentications in syslog """
+
     print("Building IP Lookup Table")
+    concat_syslogs()
     if(os.path.exists(IP_LOOKUP_TABLE_PATH) == False):
         lookup = {}
 

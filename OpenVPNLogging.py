@@ -298,7 +298,7 @@ def pull_successful_auth():
 
 def log_failed_auth(client):
     """Parses through syslog file to find Authentication Failure events and adds a log into the eventlog measurement"""
-    with open(SYS_LOG_PATH, 'r') as file:#need to change to syslog after done testing
+    with open(TMP_FILE_PATH, 'r') as file:#need to change to syslog after done testing
         log = list()
         for line in file.readlines():
             if FAILED_AUTH.match(line) is not None:

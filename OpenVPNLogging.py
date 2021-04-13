@@ -176,6 +176,7 @@ def build_IP_lookup_table():
     geo_path = "/".join(geo_path)
     geo_path = "/" + geo_path
 
+    geo = {}
     geo_table = open(geo_path,"w")
 
     active = pull_active_IPs()

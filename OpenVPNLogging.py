@@ -402,11 +402,9 @@ def log_active_users(client, user_data):
     for key in user_data.keys():
         current = user_data[key]
 
-        try:
-            geo_hash = geo_table[key]
-        except:
-            geo_hash = ""
-            print("no geohash found")
+        geo_hash = geo_table[key]
+        geo_hash = ""
+            #print("no geohash found")
 
         data_end_time = int(time.time() * 1000) #milliseconds
 

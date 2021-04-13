@@ -316,6 +316,7 @@ def log_failed_auth(client):
                     date_time = date_time[:19] + 'Z'
                 except:
                     print("date not recognized in user Auth Failure. most likaly improper format. Make Sure syslog is using local time. this issue will remain until local time propagates into archived syslogs")
+                    return
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 

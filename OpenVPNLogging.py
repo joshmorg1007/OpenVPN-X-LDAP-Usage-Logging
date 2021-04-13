@@ -7,7 +7,6 @@ import platform
 import time
 import pytz
 import requests
-import geohash
 from datetime import datetime, timedelta, timezone
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS

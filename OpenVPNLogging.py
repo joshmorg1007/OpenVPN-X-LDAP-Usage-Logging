@@ -20,7 +20,7 @@ SUCCEED_AUTH = re.compile(".*succeeded for username")
 FAILED_AUTH = re.compile(".*TLS Auth Error")
 NAME = re.compile ("\w+(?=')")
 IP = re.compile("\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(?=:\d+)")
-DATE = re.compile("\w{3}\s+\d{2}\s\d{2}:\d{2}:\d{2}")
+DATE = re.compile("\w{3}\s\d{2}\s\d{2}:\d{2}:\d{2}")
 
     ### Loading From Config
 try:

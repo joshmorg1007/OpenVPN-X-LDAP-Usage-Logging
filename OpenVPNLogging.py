@@ -192,12 +192,11 @@ def build_IP_lookup_table():
         #try:
         hash = lookup_IP_geolocation(IP)
         geo[IP] = hash
-        print(hash)
         #except:
             #print("error with geolocational lookup")
 
     json.dump(lookup, ip_table)
-    json.dump(geo_table, geo)
+    json.dump(geo,geo_table)
 
     ip_table.close()
     geo_table.close()

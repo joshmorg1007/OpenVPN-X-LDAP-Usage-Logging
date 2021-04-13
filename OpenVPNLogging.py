@@ -309,14 +309,11 @@ def log_failed_auth(client):
                 ip = IP.findall(line)
                 date_time = DATE.findall(line)
 
-                try:
-                    date_time = get_con_datetime(date_time[0])
-                    date_time = date_time.astimezone(tz=pytz.utc)
-                    date_time = date_time.isoformat("T")
-                    date_time = date_time[:19] + 'Z'
-                except:
-                    print("no date found")
-                    break
+                date_time = get_con_datetime(date_time[0])
+                date_time = date_time.astimezone(tz=pytz.utc)
+                date_time = date_time.isoformat("T")
+                date_time = date_time[:19] + 'Z'
+
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 

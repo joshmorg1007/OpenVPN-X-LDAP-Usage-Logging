@@ -409,8 +409,8 @@ def print_formated_data(user_data):
 
 def concat_syslogs():
     """Concatinates all syslog files into one temp file"""
-    os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip |grep ovpn-server> " + TMP_FILE_PATH)
-    os.system("/bin/cat /var/log/syslog.1 /var/log/syslog | grep ovpn-server >> " + TMP_FILE_PATH)
+    os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip |/bin/grep ovpn-server > " + TMP_FILE_PATH)
+    os.system("/bin/cat /var/log/syslog.1 /var/log/syslog | /bin/grep ovpn-server >> " + TMP_FILE_PATH)
 
 def get_con_datetime(date):
     """Converts the timestamp in syslog to miliseconds"""

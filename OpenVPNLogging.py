@@ -413,7 +413,6 @@ def log_active_users(client, user_data):
     write_api.write(bucket=BUCKET, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
-    geo_table.close()
 
 def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     """adds a Download and Upload usage measurement to the database for each user connected"""

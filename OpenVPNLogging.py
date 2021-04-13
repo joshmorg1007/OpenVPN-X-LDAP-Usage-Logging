@@ -387,17 +387,33 @@ def log_active_users(client, user_data):
     hour_ago = hour_ago.isoformat("T") + "Z"
     client.delete_api().delete(hour_ago, now, '"_measurement"="statuslog"', bucket = BUCKET, org=ORG)
 
+    geo_path = IP_LOOKUP_TABLE_PATH.split("/")
+    geo_path = geo_path[1:]
+    geo_path = geo_path[:-1]
+    geo_path.append("geo_table.json")
+    geo_path = "/".join(geo_path)
+    geo_path = "/" + geo_path
+
+    geo_table = open(geo_path,"r")
+
     log = list()
     for key in user_data.keys():
         current = user_data[key]
+
+        try:
+            geohash = geo_table[key]
+        except:
+            print("no geohash found")
+
         data_end_time = int(time.time() * 1000) #milliseconds
 
-        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").tag("LoggedInSince", current[5][:-1]).time(now))
+        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").field("GeoHash", geohash).tag("LoggedInSince", current[5][:-1]).time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)
     client_write_end_time = time.perf_counter()
     print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
+    geo_table.close()
 
 def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     """adds a Download and Upload usage measurement to the database for each user connected"""

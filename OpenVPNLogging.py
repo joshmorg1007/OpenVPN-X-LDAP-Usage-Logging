@@ -590,6 +590,7 @@ def init_environment():
     config["cache_path"] = cached_data_file_path
     config["syslog"] = input("Enter syslog Path: ")
     config["vpn_status"] = input("Enter OpenVPN Status File Path: ")
+    config["ipkey"] = input("Enter ipstack api key: ")
 
     config_file = open(installed_path + "/config.json", "w")
 

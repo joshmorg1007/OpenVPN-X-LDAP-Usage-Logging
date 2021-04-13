@@ -309,11 +309,13 @@ def log_failed_auth(client):
                 ip = IP.findall(line)
                 date_time = DATE.findall(line)
 
-                date_time = get_con_datetime(date_time[0])
-                date_time = date_time.astimezone(tz=pytz.utc)
-                date_time = date_time.isoformat("T")
-                date_time = date_time[:19] + 'Z'
-
+                try:
+                    date_time = get_con_datetime(date_time[0])
+                    date_time = date_time.astimezone(tz=pytz.utc)
+                    date_time = date_time.isoformat("T")
+                    date_time = date_time[:19] + 'Z'
+                except:
+                    print("date not recognized in user Auth Failure. most likaly improper format. Make Sure syslog is using local time. this issue will remain until local time propagates into archived syslogs")
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 
@@ -381,11 +383,9 @@ def log_data_usage(client, name, IP, virt_IP, data_up, data_down):
     data_end_time = int(time.time() * 1000) #milliseconds
     now = datetime.utcnow()
     now = now.isoformat("T") + "Z"
-    print("logging data")
     log = list()
 
     log.append(Point("Download").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_down", data_down).time(now))
-    print(data_down)
 
     log.append(Point("Upload").tag("User", name).tag("IP", IP).tag("VirtIP", virt_IP).field("data_up", data_up).time(now))
 

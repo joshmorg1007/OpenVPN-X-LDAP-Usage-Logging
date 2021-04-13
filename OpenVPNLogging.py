@@ -307,8 +307,8 @@ def log_failed_auth(client):
 
                 try:
                     date_time = get_con_datetime(date_time[0])
-                    date_time = date_time.replace(tzinfo=timezone.utc).astimezone(tz=None)
-                    date_time = date_time.isoformat("T")
+                    #date_time = date_time.astimezone(tz=None)
+                    #date_time = date_time.isoformat("T")
                     date_time = date_time[:19] + 'z'
                 except:
                     print("no date found")

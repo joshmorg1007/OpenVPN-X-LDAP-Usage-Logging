@@ -452,9 +452,7 @@ def concat_syslogs():
 def lookup_IP_geolocation(IP):
     """makes an api call to ipstack and gets the geolocational data for a given IP"""
     data = requests.get("http://api.ipstack.com/" + IP + "?access_key=" + IPKEY).json()
-    long = data["longitude"]
-    lat = data["latitude"]
-    return geohash.encode(lat, long)
+    return data["country_code"]
 
 def get_con_datetime(date):
     """Converts the timestamp in syslog to miliseconds"""

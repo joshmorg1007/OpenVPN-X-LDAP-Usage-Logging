@@ -413,7 +413,7 @@ def concat_syslogs():
     os.system("/bin/cat /var/log/syslog.1 /var/log/syslog >> " + TMP_FILE_PATH)
     os.system("cat " + TMP_FILE_PATH + "| grep ovpn-server > " + TMP_FILE_PATH+"2")
     os.system("cat " + TMP_FILE_PATH+"2"+ "> TMP_FILE_PATH")
-    os.system(rm TMP_FILE_PATH+"2")
+    os.system("rm "+ TMP_FILE_PATH+"2")
 
 def get_con_datetime(date):
     """Converts the timestamp in syslog to miliseconds"""

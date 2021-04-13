@@ -458,9 +458,7 @@ def lookup_IP_geolocation(IP):
     data = requests.get("http://api.ipstack.com/" + IP + "?access_key=" + IPKEY).json()
     long = data["longitude"]
     lat = data["latitude"]
-    print(long)
-    print(lat)
-    return geohash.encode(long, lat)
+    return geohash.encode(lat, long)
 
 def get_con_datetime(date):
     """Converts the timestamp in syslog to miliseconds"""

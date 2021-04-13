@@ -188,10 +188,10 @@ def build_IP_lookup_table():
         except:
             print("No name matching: " + str(IP) + " in LDAP logs")
 
-        try:
-            geo[IP] = lookup_IP_geolocation(IP)
-        except:
-            print("error with geolocational lookup")
+        #try:
+        geo[IP] = lookup_IP_geolocation(IP)
+        #except:
+        #    print("error with geolocational lookup")
 
     json.dump(lookup, ip_table)
     json.dump(geo_table, geo)

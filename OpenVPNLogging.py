@@ -396,16 +396,14 @@ def log_active_users(client, user_data):
     geo_path = "/".join(geo_path)
     geo_path = "/" + geo_path
 
-    geo_table = open(geo_path,"r")
-    geo_data = json.load(file)
+    with open(geo_path,"r") as file:
+        geo_data = json.load(file)
 
     log = list()
     for key in user_data.keys():
         current = user_data[key]
 
         geo_hash = geo_data[key]
-        geo_hash = ""
-            #print("no geohash found")
 
         data_end_time = int(time.time() * 1000) #milliseconds
 

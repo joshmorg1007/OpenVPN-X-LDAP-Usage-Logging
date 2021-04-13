@@ -407,7 +407,7 @@ def log_active_users(client, user_data):
 
         data_end_time = int(time.time() * 1000) #milliseconds
 
-        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").tag("GeoHash", geo_hash).tag("LoggedInSince", current[5][:-1]).time(now))
+        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").field("GeoHash", geo_hash).tag("LoggedInSince", current[5][:-1]).time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)

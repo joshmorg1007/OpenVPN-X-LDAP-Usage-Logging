@@ -288,6 +288,7 @@ def pull_successful_auth():
     with open(TMP_FILE_PATH, "r") as file:
         succeded = {}
         for line in file.readlines():
+            print(line)
             if SUCCEED_AUTH.match(line) is not None:
                 name = NAME.findall(line)
                 ip = IP.findall(line)

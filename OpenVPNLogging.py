@@ -288,7 +288,6 @@ def pull_successful_auth():
     with open(TMP_FILE_PATH, "r") as file:
         succeded = {}
         for line in file.readlines():
-            print(line)
             if SUCCEED_AUTH.match(line) is not None:
                 name = NAME.findall(line)
                 ip = IP.findall(line)
@@ -306,6 +305,7 @@ def log_failed_auth(client):
     with open(TMP_FILE_PATH, 'r') as file:#need to change to syslog after done testing
         log = list()
         for line in file.readlines():
+            print(line)
             if FAILED_AUTH.match(line) is not None:
                 ip = IP.findall(line)
                 date_time = DATE.findall(line)

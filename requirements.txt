@@ -1,3 +1,4 @@
 influxdb_client==1.15.0
 python_crontab==2.5.1
 python-geohash==0.8.5
+ geoip2==4.1.0

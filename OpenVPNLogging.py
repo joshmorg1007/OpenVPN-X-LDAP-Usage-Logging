@@ -6,6 +6,8 @@ import sys
 import platform
 import time
 import pytz
+import geoip2.database
+import geohash
 from datetime import datetime, timedelta, timezone
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -37,6 +39,7 @@ try:
     SYS_LOG_PATH = data["syslog"]
     OPENVPNLOG_PATH = data["vpn_status"]
     BUCKET = platform.uname()[1] + "-VPN"
+    IPDB_PATH = data["ipdbpath"]
 except:
     print("Issue with Config, please run the command init command")
 
@@ -166,6 +169,16 @@ def build_IP_lookup_table():
 
     ip_table = open(IP_LOOKUP_TABLE_PATH, "w")
 
+    geo_path = IP_LOOKUP_TABLE_PATH.split("/")
+    geo_path = geo_path[1:]
+    geo_path = geo_path[:-1]
+    geo_path.append("geo_table.json")
+    geo_path = "/".join(geo_path)
+    geo_path = "/" + geo_path
+
+    geo = {}
+    geo_table = open(geo_path,"w")
+
     active = pull_active_IPs()
     auth = pull_successful_auth()
 
@@ -175,9 +188,18 @@ def build_IP_lookup_table():
             lookup[IP] = auth[IP]
         except:
             print("No name matching: " + str(IP) + " in LDAP logs")
+
+        #try:
+        hash = lookup_IP_geolocation(IP)
+        geo[IP] = hash
+        #except:
+            #print("error with geolocational lookup")
+
     json.dump(lookup, ip_table)
+    json.dump(geo,geo_table)
 
     ip_table.close()
+    geo_table.close()
 
 def cache_prev(prev_data):
     """writes the previous data to a json file acting as a cache to be used to calculate the delta of data used"""
@@ -333,7 +355,10 @@ def log_login_event(client, user_info):
     now = now.isoformat("T") + "Z"
     log = list()
 
-    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged In").time(now))
+    geo_data = lookup_IP_geolocation(user_info[1])
+    city_name = geo_data.city.name
+
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).tag("City", city_name).field("Event", "User Logged In").time(now))
 
 
     client_write_start_time = time.perf_counter()
@@ -348,9 +373,12 @@ def log_logout_event(client, user_info):
     now = datetime.utcnow()
     now = now.isoformat("T") + "Z"
 
+    geo_data = lookup_IP_geolocation(user_info[1])
+    city_name = geo_data.city.name
+
     log = list()
 
-    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).field("Event", "User Logged Out").time(now))
+    log.append(Point("eventlog").tag("User", user_info[0]).tag("IP", user_info[1]).tag("VirtIP", user_info[2]).tag("City", city_name).field("Event", "User Logged Out").time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)
@@ -367,12 +395,21 @@ def log_active_users(client, user_data):
     hour_ago = hour_ago.isoformat("T") + "Z"
     client.delete_api().delete(hour_ago, now, '"_measurement"="statuslog"', bucket = BUCKET, org=ORG)
 
+
     log = list()
     for key in user_data.keys():
         current = user_data[key]
+
+        geo_data = lookup_IP_geolocation(key)
+        city_name = geo_data.city.name
+        lat = geo_data.location.latitude
+        long = geo_data.location.longitude
+
+        geo_hash = geohash.encode(lat, long)
+
         data_end_time = int(time.time() * 1000) #milliseconds
 
-        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").tag("LoggedInSince", current[5][:-1]).time(now))
+        log.append(Point("statuslog").tag("User", current[0]).tag("IP", current[1]).tag("VirtIP", current[2]).field("Event", "User Active").tag("City", city_name).tag("GeoHash", geo_hash).tag("LoggedInSince", current[5][:-1]).time(now))
 
     client_write_start_time = time.perf_counter()
     write_api.write(bucket=BUCKET, org = ORG, record=log)
@@ -413,6 +450,12 @@ def concat_syslogs():
     """Concatinates all syslog files into one temp file"""
     os.system("/bin/cat /var/log/syslog.7.gz /var/log/syslog.6.gz /var/log/syslog.5.gz /var/log/syslog.4.gz /var/log/syslog.3.gz /var/log/syslog.2.gz | /bin/gunzip |/bin/grep ovpn-server > " + TMP_FILE_PATH)
     os.system("/bin/cat /var/log/syslog.1 /var/log/syslog | /bin/grep ovpn-server >> " + TMP_FILE_PATH)
+
+def lookup_IP_geolocation(IP):
+    """looks ups IP geolocation from database"""
+    reader = geoip2.database.Reader(IPDB_PATH)
+    response = reader.city(IP)
+    return response
 
 def get_con_datetime(date):
     """Converts the timestamp in syslog to miliseconds"""
@@ -547,6 +590,7 @@ def init_environment():
     config["cache_path"] = cached_data_file_path
     config["syslog"] = input("Enter syslog Path: ")
     config["vpn_status"] = input("Enter OpenVPN Status File Path: ")
+    config["ipdbpath"] = input("IPDB File Path: ")
 
     config_file = open(installed_path + "/config.json", "w")
 

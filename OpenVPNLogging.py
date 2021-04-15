@@ -6,7 +6,7 @@ import sys
 import platform
 import time
 import pytz
-import GeoIP2.database
+import geoip2.database
 import geohash
 from datetime import datetime, timedelta, timezone
 from influxdb_client import InfluxDBClient, Point, WritePrecision

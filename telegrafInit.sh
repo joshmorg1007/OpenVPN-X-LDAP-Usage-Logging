@@ -4,9 +4,6 @@ echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stabl
 sudo apt-get update
 sudo apt-get install telegraf
 
-sudo systemctl enable --now telegraf
-sudo systemctl start --now telegraf
-
 echo Enter the InfluxDB Token for Telegraf.
 read token
 
@@ -20,4 +17,5 @@ sudo systemctl stop --now telegraf
 sudo curl $config --header "Authorization: Token ${token}" > /etc/telegraf/telegraf.conf
 sudo sed -i "s/\$INFLUX_TOKEN/${token}/g" /etc/telegraf/telegraf.conf
 
+sudo systemctl enable --now telegraf
 sudo systemctl start --now telegraf

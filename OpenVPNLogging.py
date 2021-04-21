@@ -342,7 +342,7 @@ def log_failed_auth(client):
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 
-    try:
+    try: ### this try block should replaced with a method to determine if the given auth failled event occured outside of the 7 day window of the influxdb bucket.
         client_write_start_time = time.perf_counter()
         write_api.write(bucket=BUCKET, org = ORG, record=log)
         client_write_end_time = time.perf_counter()

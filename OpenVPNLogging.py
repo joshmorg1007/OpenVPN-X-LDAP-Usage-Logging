@@ -342,11 +342,13 @@ def log_failed_auth(client):
 
                 log.append(Point("eventlog").tag("User", "Unknown").tag("IP", ip[0]).field("Event", "User Failed Authentication").time(date_time))
 
-
-    client_write_start_time = time.perf_counter()
-    write_api.write(bucket=BUCKET, org = ORG, record=log)
-    client_write_end_time = time.perf_counter()
-    print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
+    try:
+        client_write_start_time = time.perf_counter()
+        write_api.write(bucket=BUCKET, org = ORG, record=log)
+        client_write_end_time = time.perf_counter()
+        print("Client Library Write: {time}s".format(time=client_write_end_time - client_write_start_time))
+    except:
+        print("Error with write attempt in log_failed_auth")
 
 def log_login_event(client, user_info):
     """Adds a Login Event to the eventlog measurement"""
